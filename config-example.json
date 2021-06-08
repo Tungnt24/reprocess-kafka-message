@@ -1,0 +1,6 @@
+{
+    "KAFKA_PRODUCER": {
+        "KAFKA_BROKER": [
+        ]
+    }
+}
