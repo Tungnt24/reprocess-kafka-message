@@ -125,10 +125,10 @@ def main(arg):
             user, partition, time_start, time_end, list_event_type
         )
     elif with_offset:
-        user = arg[0]
-        partition = int(arg[1])
-        offset_start = arg[2]
-        offset_end = arg[3]
+        user = with_offset[0]
+        partition = int(with_offset[1])
+        offset_start = with_offset[2]
+        offset_end = with_offset[3]
         list_event_type = None
         if len(with_timestamp) == 5:
             list_event_type = with_offset[4].split(",")
