@@ -7,13 +7,13 @@ arg.add_argument(
     "--resend_with_timestamp",
     type=str,
     nargs="+",
-    help="python3 src/app -rwt example@domain.con topic partition time_start time_end",
+    help="python3 resend_kafka_message/run.py -rwt example@domain.con partition time_start time_end time_format: 12 or 24",
 )
 arg.add_argument(
     "-rwo",
     "--resend_with_offset",
     type=str,
     nargs="+",
-    help="python3 src/app -rwo example@domain.con topic partition offset_start offset_end",
+    help="python3 resend_kafka_message/run.py -rwo example@domain.con partition offset_start offset_end",
 )
 args = parser.parse_args()
