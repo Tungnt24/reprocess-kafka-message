@@ -36,9 +36,6 @@ class KafkaBackupConsumer:
         )
         self.topic = KafkaConsumerConfig.KAFKA_TOPIC
 
-    def fetch_data(self, timeout_ms):
-        self.consumer.poll(timeout_ms)
-
     def kafka_close(self):
         self.consumer.close(autocommit=False)
 

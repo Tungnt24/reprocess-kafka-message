@@ -1,6 +1,17 @@
 {
     "KAFKA_PRODUCER": {
         "KAFKA_BROKER": [
-        ]
-    }
+           
+        ],
+        "KAFKA_TOPIC": ""
+    },
+    "KAFKA_CONSUMER":{
+    "KAFKA_BROKER":[
+      
+    ],
+    "KAFKA_TOPIC": "",
+    "KAFKA_ENABLE_AUTO_COMMIT": false,
+    "KAFKA_AUTO_OFFSET_RESET": "earliest",
+    "KAFKA_MAX_POLL_RECORDS": 1
+  }
 }
