@@ -5,6 +5,7 @@ from resend_kafka_message.logic.client.kafka_client import (
     KafkaBackupProducer,
 )
 from resend_kafka_message.utils.logger import logger
+from resend_kafka_message.utils.decorator import retry
 
 
 def convert_to_timestamp(datetime_str: str):
@@ -13,7 +14,11 @@ def convert_to_timestamp(datetime_str: str):
     local_time = datetime.datetime.strptime(new_datetime, "%m/%d/%Y %H:%M:%S")
     if time_format == "PM":
         hours_added = datetime.timedelta(hours=12)
-        local_time = local_time + hours_added
+        if local_time.hour != 12:
+            local_time = local_time + hours_added
+    elif time_format == 'AM' and local_time.hour == 12:
+        hours_added = datetime.timedelta(hours=12)
+        local_time = local_time - hours_added
     logger.info(f"LOCAL TIME: {local_time}")
     timestamp = int(datetime.datetime.timestamp(local_time))
     return timestamp
@@ -48,6 +53,7 @@ def send_kafka_message(user: str, event: Dict, partition: int):
     logger.info("DONE")
 
 
+@retry(times=3, delay=2, logger=logger)
 def poll_message(
     consumer: KafkaBackupConsumer,
     user: str,
@@ -58,7 +64,12 @@ def poll_message(
 ):
     logger.info(f"OFFSET START: {offset_start}")
     logger.info(f"OFFSET END: {offset_end}")
-    consumer.assign_partition(partition)
+    try:
+        possion = consumer.current_possion(partition)
+        if possion > 0:
+            offset_start = possion
+    except AssertionError:
+        consumer.assign_partition(partition)
     offset = consumer.seek_message(partition, offset_start)
     for _ in range(offset_start, offset_end):
         msg = next(offset)

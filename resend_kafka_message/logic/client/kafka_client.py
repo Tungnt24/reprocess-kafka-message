@@ -5,6 +5,7 @@ from resend_kafka_message.setting import (
 )
 import json
 from kafka.structs import TopicPartition
+from resend_kafka_message.utils.logger import logger
 
 
 class KafkaBackupProducer:
@@ -76,6 +77,8 @@ class KafkaBackupConsumer:
             offset_timestamp_start,
             offset_timestamp_end,
         ) = self.get_offset_and_timestamp(tp, timestamp_start, timestamp_end)
+        if offset_timestamp_start is None or offset_timestamp_start is None:
+            raise Exception("could not found offset and timestamp")
         offset_start = offset_timestamp_start.offset
         offset_end = offset_timestamp_end.offset
         return offset_start, offset_end
