@@ -10,13 +10,16 @@ from resend_kafka_message.utils.decorator import retry
 
 def convert_to_timestamp(datetime_str: str):
     time_format = datetime_str[-2:]
-    new_datetime = datetime_str.replace(time_format, "")
-    local_time = datetime.datetime.strptime(new_datetime, "%m/%d/%Y %H:%M:%S")
+    local_time = datetime.datetime.strptime(datetime_str, "%m/%d/%Y %H:%M:%S")
     if time_format == "PM":
+        new_datetime = datetime_str.replace(time_format, "")
+        local_time = datetime.datetime.strptime(new_datetime, "%m/%d/%Y %H:%M:%S")
         hours_added = datetime.timedelta(hours=12)
         if local_time.hour != 12:
             local_time = local_time + hours_added
     elif time_format == 'AM' and local_time.hour == 12:
+        new_datetime = datetime_str.replace(time_format, "")
+        local_time = datetime.datetime.strptime(new_datetime, "%m/%d/%Y %H:%M:%S")
         hours_added = datetime.timedelta(hours=12)
         local_time = local_time - hours_added
     logger.info(f"LOCAL TIME: {local_time}")
@@ -141,7 +144,7 @@ def main(arg):
         offset_start = with_offset[2]
         offset_end = with_offset[3]
         list_event_type = None
-        if len(with_timestamp) == 5:
+        if len(with_offset) == 5:
             list_event_type = with_offset[4].split(",")
         resend_with_offset(user, partition, offset_start, offset_end, list_event_type)
     else:
