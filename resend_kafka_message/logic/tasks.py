@@ -59,7 +59,7 @@ def send_kafka_message(user: str, event: Dict, partition: int):
 @retry(times=3, delay=2, logger=logger)
 def poll_message(
     consumer: KafkaBackupConsumer,
-    user: str,
+    #user: str,
     partition: int,
     offset_start: int,
     offset_end: int,
@@ -77,15 +77,16 @@ def poll_message(
     for _ in range(offset_start, offset_end):
         msg = next(offset)
         event = msg.value
-        if event["user"] != user:
-            continue
+        user = event[user]
+        #if event["user"] != user:
+         #   continue
         if list_event_type and event["event"] not in list_event_type:
                 continue
         send_kafka_message(user, event, partition)
 
 
 def resend_with_timestamp(
-    user: str,
+    #user: str,
     partition: int,
     time_start: str,
     time_end: str,
@@ -100,7 +101,7 @@ def resend_with_timestamp(
         consumer.kafka_close()
         return
     poll_message(
-        consumer, user, partition, offset_start, offset_end, list_event_type
+        consumer, partition, offset_start, offset_end, list_event_type
     )
     consumer.kafka_close()
 
@@ -128,16 +129,17 @@ def main(arg):
     with_timestamp = arg.get("resend_with_timestamp")
     with_offset = arg.get("resend_with_offset")
     if with_timestamp:
-        user = with_timestamp[0]
-        partition = int(with_timestamp[1])
+        #user = with_timestamp[0]
+        #partition = int(with_timestamp[1])
         time_start = with_timestamp[2]
         time_end = with_timestamp[3]
         list_event_type = None
         if len(with_timestamp) == 5:
             list_event_type = with_timestamp[4].split(",")
-        resend_with_timestamp(
-            user, partition, time_start, time_end, list_event_type
-        )
+        for i in range(12):
+            resend_with_timestamp(
+                i, time_start, time_end, list_event_type
+            )
     elif with_offset:
         user = with_offset[0]
         partition = int(with_offset[1])
