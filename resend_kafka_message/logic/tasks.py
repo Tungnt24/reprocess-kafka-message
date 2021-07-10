@@ -77,7 +77,7 @@ def poll_message(
     for _ in range(offset_start, offset_end):
         msg = next(offset)
         event = msg.value
-        user = event[user]
+        user = event["user"]
         #if event["user"] != user:
          #   continue
         if list_event_type and event["event"] not in list_event_type:
@@ -131,12 +131,13 @@ def main(arg):
     if with_timestamp:
         #user = with_timestamp[0]
         #partition = int(with_timestamp[1])
-        time_start = with_timestamp[2]
-        time_end = with_timestamp[3]
+        time_start = with_timestamp[0]
+        time_end = with_timestamp[1]
         list_event_type = None
         if len(with_timestamp) == 5:
             list_event_type = with_timestamp[4].split(",")
-        for i in range(12):
+        list_event_type = ["FlagsSet"]
+        for i in range(1, 11):
             resend_with_timestamp(
                 i, time_start, time_end, list_event_type
             )

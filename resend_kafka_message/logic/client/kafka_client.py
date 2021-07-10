@@ -17,8 +17,9 @@ class KafkaBackupProducer:
         self.topic = KafkaProducerConfig.KAFKA_TOPIC
 
     def send_message(self, user, event, partition):
+        logger.info(f"TOPIC: webmail_product_{partition}")
         self.producer.send(
-            topic=self.topic,
+            topic=f'webmail_product{partition}',
             key=bytes(user, "utf-8"),
             value=event,
             partition=partition,
