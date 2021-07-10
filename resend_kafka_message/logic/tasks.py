@@ -136,8 +136,8 @@ def main(arg):
         list_event_type = None
         if len(with_timestamp) == 5:
             list_event_type = with_timestamp[4].split(",")
-        list_event_type = ["FlagsSet"]
-        for i in range(1, 11):
+        list_event_type = ["FlagsSet", "FlagsClear", "MessageTrash"]
+        for i in range(3, 11):
             resend_with_timestamp(
                 i, time_start, time_end, list_event_type
             )
