@@ -63,7 +63,8 @@ def send_kafka_message(user: str, event: Dict, partition: int):
 def poll_message(
     consumer: KafkaBackupConsumer,
     user: str,
-    partition: int,
+    domain: str,
+    _partition: int,
     offset_start: int,
     offset_end: int,
     list_event_type: List=None,
@@ -71,16 +72,20 @@ def poll_message(
     logger.info(f"OFFSET START: {offset_start}")
     logger.info(f"OFFSET END: {offset_end}")
     try:
-        possion = consumer.current_possion(partition)
+        possion = consumer.current_possion(_partition)
         if possion > 0:
             offset_start = possion
     except AssertionError:
-        consumer.assign_partition(partition)
-    offset = consumer.seek_message(partition, offset_start)
+        consumer.assign_partition(_partition)
+    offset = consumer.seek_message(_partition, offset_start)
     mqtt = MQTTClient()
     for _ in range(offset_start, offset_end):
         msg = next(offset)
         event = msg.value
+        _, _, d = event['user'].partition("@")
+        if domain:
+            if d != domain:
+                continue
         if user:
             if event["user"] != user:
                 continue
@@ -93,6 +98,7 @@ def poll_message(
 
 def resend_with_timestamp(
     user: str,
+    domain: str,
     partition: int,
     time_start: str,
     time_end: str,
@@ -107,7 +113,7 @@ def resend_with_timestamp(
         consumer.kafka_close()
         return
     poll_message(
-        consumer, user, partition, offset_start, offset_end, list_event_type
+        consumer, user, domain, partition, offset_start, offset_end, list_event_type
     )
     consumer.kafka_close()
 
@@ -138,19 +144,19 @@ def main(arg):
         user = with_timestamp[0]
         if user == "-1":
             user = ""
-        partition = int(with_timestamp[1])
-        time_start = with_timestamp[2]
-        time_end = with_timestamp[3]
+        domain = with_timestamp[1]
+        partition = int(with_timestamp[2])
+        time_start = with_timestamp[3]
+        time_end = with_timestamp[4]
         list_event_type = None
         if partition == -1:
-            print("AAAAAAAAA")
             for i in range(12):
                 resend_with_timestamp(
-                    user, i, time_start, time_end, list_event_type
+                    user, domain, i, time_start, time_end, list_event_type
                 )
         else:
             resend_with_timestamp(
-                user, partition, time_start, time_end, list_event_type
+                user, domain, partition, time_start, time_end, list_event_type
             )
     elif with_offset:
         user = with_offset[0]
