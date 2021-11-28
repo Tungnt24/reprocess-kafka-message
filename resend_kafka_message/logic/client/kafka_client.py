@@ -78,7 +78,9 @@ class KafkaBackupConsumer:
             offset_timestamp_end,
         ) = self.get_offset_and_timestamp(tp, timestamp_start, timestamp_end)
         if offset_timestamp_start is None or offset_timestamp_start is None:
-            raise Exception("could not found offset and timestamp")
-        offset_start = offset_timestamp_start.offset
-        offset_end = offset_timestamp_end.offset
+            print("could not found offset and timestamp")
+            offset_start, offset_end = 0, 0
+        else:
+            offset_start = offset_timestamp_start.offset
+            offset_end = offset_timestamp_end.offset
         return offset_start, offset_end

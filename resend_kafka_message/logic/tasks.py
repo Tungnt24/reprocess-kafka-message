@@ -6,12 +6,14 @@ from resend_kafka_message.logic.client.kafka_client import (
 )
 from resend_kafka_message.utils.logger import logger
 from resend_kafka_message.utils.decorator import retry
+from resend_kafka_message.logic.client.mqtt_client import MQTTClient
 
 
 def convert_to_timestamp(datetime_str: str):
     time_format = datetime_str[-2:]
     local_time = datetime.datetime.strptime(datetime_str, "%m/%d/%Y %H:%M:%S")
     if time_format == "PM":
+        print("A")
         new_datetime = datetime_str.replace(time_format, "")
         local_time = datetime.datetime.strptime(new_datetime, "%m/%d/%Y %H:%M:%S")
         hours_added = datetime.timedelta(hours=12)
@@ -43,6 +45,7 @@ def get_offset_with_timestamp(
     end: str,
 ):
     time_start, time_end = handle_timestamp(start, end)
+    print(time_start, time_end)
     offset_start, offset_end = consumer.get_offset(
         partition, time_start, time_end
     )
@@ -74,14 +77,18 @@ def poll_message(
     except AssertionError:
         consumer.assign_partition(partition)
     offset = consumer.seek_message(partition, offset_start)
+    mqtt = MQTTClient()
     for _ in range(offset_start, offset_end):
         msg = next(offset)
         event = msg.value
-        if event["user"] != user:
-            continue
+        if user:
+            if event["user"] != user:
+                continue
         if list_event_type and event["event"] not in list_event_type:
                 continue
-        send_kafka_message(user, event, partition)
+        mqtt.create_mqtt_message(event)
+        mqtt.publish_message(consumer)
+        #send_kafka_message(user, event, partition)
 
 
 def resend_with_timestamp(
@@ -129,15 +136,22 @@ def main(arg):
     with_offset = arg.get("resend_with_offset")
     if with_timestamp:
         user = with_timestamp[0]
+        if user == "-1":
+            user = ""
         partition = int(with_timestamp[1])
         time_start = with_timestamp[2]
         time_end = with_timestamp[3]
         list_event_type = None
-        if len(with_timestamp) == 5:
-            list_event_type = with_timestamp[4].split(",")
-        resend_with_timestamp(
-            user, partition, time_start, time_end, list_event_type
-        )
+        if partition == -1:
+            print("AAAAAAAAA")
+            for i in range(12):
+                resend_with_timestamp(
+                    user, i, time_start, time_end, list_event_type
+                )
+        else:
+            resend_with_timestamp(
+                user, partition, time_start, time_end, list_event_type
+            )
     elif with_offset:
         user = with_offset[0]
         partition = int(with_offset[1])
