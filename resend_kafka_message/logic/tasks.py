@@ -9,8 +9,11 @@ from resend_kafka_message.utils.decorator import retry
 
 
 def convert_to_timestamp(datetime_str: str):
-    time_format = datetime_str[-2:]
-    local_time = datetime.datetime.strptime(datetime_str, "%m/%d/%Y %H:%M:%S")
+    if "AM" in datetime_str or "PM" in datetime_str:
+        time_format = datetime_str[-2:]
+        local_time = datetime.datetime.strptime(datetime_str[:-2], "%m/%d/%Y %H:%M:%S")
+    else:
+        local_time = datetime.datetime.strptime(datetime_str, "%m/%d/%Y %H:%M:%S")
     if time_format == "PM":
         new_datetime = datetime_str.replace(time_format, "")
         local_time = datetime.datetime.strptime(new_datetime, "%m/%d/%Y %H:%M:%S")
