@@ -109,7 +109,7 @@ class KafkaBackupConsumer:
     def kafka_close(self):
         self.consumer.close(autocommit=False)
 
-    def current_possion(self, partition):
+    def current_position(self, partition):
         tp = TopicPartition(self.topic, partition)
         return self.consumer.position(tp)
 
