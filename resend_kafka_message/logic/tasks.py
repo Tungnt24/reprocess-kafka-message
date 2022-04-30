@@ -52,7 +52,8 @@ def get_offset_with_timestamp(
 def send_kafka_message(user: str, event: Dict, partition: int):
     logger.info(f"SENDING MESSAGE | USER: {user} | MESSAGE: {event}")
     producer = KafkaBackupProducer()
-    producer.send_message(user, event, partition)
+    producer.create_kafka_message(event)
+    producer.send_message()
     logger.info("DONE")
 
 
@@ -68,9 +69,9 @@ def poll_message(
     logger.info(f"OFFSET START: {offset_start}")
     logger.info(f"OFFSET END: {offset_end}")
     try:
-        possion = consumer.current_possion(partition)
-        if possion > 0:
-            offset_start = possion
+        position = consumer.current_position(partition)
+        if position > 0:
+            offset_start = position
     except AssertionError:
         consumer.assign_partition(partition)
     offset = consumer.seek_message(partition, offset_start)
