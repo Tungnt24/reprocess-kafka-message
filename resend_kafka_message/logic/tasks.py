@@ -1,5 +1,7 @@
 import datetime
+from re import L
 from typing import Dict, List
+import json
 from resend_kafka_message.logic.client.kafka_client import (
     KafkaBackupConsumer,
     KafkaBackupProducer,
@@ -129,9 +131,26 @@ def resend_with_offset(
     consumer.kafka_close()
 
 
+def resend_with_file(file_name: str):
+    logger.info('File name: {}'.format(file_name))
+    with open(file_name, "r") as f:
+        data = f.readlines()
+        for i in data:
+            logger.info(f"Event: {i}")
+            user, partition, offset_start, offset_end = eval(i)
+            resend_with_offset(
+                user, int(partition), int(offset_start), int(offset_end)
+            )
+
+
 def main(arg):
     with_timestamp = arg.get("resend_with_timestamp")
     with_offset = arg.get("resend_with_offset")
+    with_file = arg.get("resend_with_file")
+    if with_file:
+        file_name = with_file[0]
+        resend_with_file(file_name)
+
     if with_timestamp:
         user = with_timestamp[0]
         partition = int(with_timestamp[1])

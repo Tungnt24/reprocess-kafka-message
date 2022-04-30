@@ -18,4 +18,13 @@ arg.add_argument(
     default=[],
     help="python3 resend_kafka_message/run.py -rwo example@domain.con partition offset_start offset_end",
 )
+
+arg.add_argument(
+    "-rwf",
+    "--resend_with_file",
+    type=str,
+    nargs="+",
+    default=[],
+    help="python3 resend_kafka_message/run.py -rwf filename",
+)
 args = parser.parse_args()
