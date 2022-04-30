@@ -23,7 +23,7 @@ class KafkaBackupProducer:
         self.bootstrap_servers = KafkaProducerConfig.KAFKA_BROKER
         self.normal_topic = KafkaProducerConfig.KAFKA_PRODUCER_NORMAL_TOPIC
         self.aggregated_topic = (
-            KafkaBackupProducer.KAFKA_PRODUCER_AGGREGATED_TOPIC
+            KafkaProducerConfig.KAFKA_PRODUCER_AGGREGATED_TOPIC
         )
         self.value_serializer = lambda x: json.dumps(x).encode("utf-8")
         self.kafka_msgs = []
@@ -74,7 +74,7 @@ class KafkaBackupProducer:
                 "Sending message: {} to topic: {}".format(payload, kafka_topic)
             )
             uids = payload.get("uids") or []
-            slice = KafkaBackupProducer.KAFKA_SLICE_SIZE
+            slice = KafkaProducerConfig.KAFKA_SLICE_SIZE
             while len(uids) >= slice:
                 p = uids[:slice]
                 uids = uids[slice:]
@@ -91,7 +91,6 @@ class KafkaBackupProducer:
 
 class KafkaBackupConsumer:
     def __init__(self) -> None:
-        print(KafkaConsumerConfig.KAFKA_BROKER)
         self.consumer = KafkaConsumer(
             bootstrap_servers=["192.168.6.202:9093"],
             auto_offset_reset=KafkaConsumerConfig.KAFKA_AUTO_OFFSET_RESET,
